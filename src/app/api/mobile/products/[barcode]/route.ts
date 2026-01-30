@@ -5,14 +5,16 @@ import { successResponse, errorResponse, unauthorizedResponse } from '@/lib/util
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { barcode: string } }
+  { params }: { params: Promise<{ barcode: string }> }
 ) {
   try {
     const user = getUserFromRequest(request)
     if (!user) return unauthorizedResponse()
 
+    const { barcode } = await params
+
     const product = await prisma.product.findUnique({
-      where: { barcode: params.barcode },
+      where: { barcode: barcode },
     })
 
     if (!product) {
