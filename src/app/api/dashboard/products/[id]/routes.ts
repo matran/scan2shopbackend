@@ -6,7 +6,7 @@ import { successResponse, errorResponse, unauthorizedResponse } from '@/lib/util
 // GET - Get single product
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: number } }
 ) {
   try {
     const user = getUserFromRequest(request)
@@ -30,7 +30,7 @@ export async function GET(
 // PUT - Update product
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: number } }
 ) {
   try {
     const user = getUserFromRequest(request)
@@ -74,7 +74,7 @@ export async function PUT(
 // DELETE - Delete product
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: number } }
 ) {
   try {
     const user = getUserFromRequest(request)
