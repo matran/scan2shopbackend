@@ -1,9 +1,9 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/db'
-import { getUserFromRequest, hashPassword } from '@/lib/auth'
+import { getUserFromRequest } from '@/lib/auth'
 import { successResponse, errorResponse, unauthorizedResponse } from '@/lib/utils'
 
-// GET - Get single user
+// GET - Get single product
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -13,35 +13,24 @@ export async function GET(
     if (!user) return unauthorizedResponse()
 
     const { id } = await params
-    const userId = parseInt(id)
+    const productId = parseInt(id)
 
-    const foundUser = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        phone: true,
-        role: true,
-        points: true,
-        createdAt: true,
-        updatedAt: true,
-      },
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
     })
 
-    if (!foundUser) {
-      return errorResponse('User not found', 404)
+    if (!product) {
+      return errorResponse('Product not found', 404)
     }
 
-    return successResponse(foundUser)
+    return successResponse(product)
   } catch (error) {
-    console.error('Get user error:', error)
-    return errorResponse('Failed to fetch user', 500)
+    console.error('Get product error:', error)
+    return errorResponse('Failed to fetch product', 500)
   }
 }
 
-// PUT - Update user
+// PUT - Update product
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -51,49 +40,44 @@ export async function PUT(
     if (!user) return unauthorizedResponse()
 
     const { id } = await params
-    const userId = parseInt(id)
+    const productId = parseInt(id)
 
     const body = await request.json()
-    const { email, password, firstName, lastName, phone, role, points } = body
+    const {
+      barcode,
+      name,
+      description,
+      price,
+      category,
+      imageUrl,
+      location,
+      inStock,
+      stockQuantity,
+    } = body
 
-    let updateData: any = {
-      email: email || undefined,
-      firstName: firstName || undefined,
-      lastName: lastName || undefined,
-      phone: phone || undefined,
-      role: role || undefined,
-      points: points !== undefined ? parseInt(points) : undefined,
-    }
-
-    // Only update password if provided
-    if (password) {
-      updateData.password = await hashPassword(password)
-    }
-
-    const updatedUser = await prisma.user.update({
-      where: { id: userId },
-      data: updateData,
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        phone: true,
-        role: true,
-        points: true,
-        createdAt: true,
-        updatedAt: true,
+    const product = await prisma.product.update({
+      where: { id: productId },
+      data: {
+        barcode: barcode || undefined,
+        name: name || undefined,
+        description: description || undefined,
+        price: price ? parseFloat(price) : undefined,
+        category: category || undefined,
+        imageUrl: imageUrl || undefined,
+        location: location || undefined,
+        inStock: inStock !== undefined ? inStock : undefined,
+        stockQuantity: stockQuantity ? parseInt(stockQuantity) : undefined,
       },
     })
 
-    return successResponse(updatedUser, 'User updated successfully')
+    return successResponse(product, 'Product updated successfully')
   } catch (error) {
-    console.error('Update user error:', error)
-    return errorResponse('Failed to update user', 500)
+    console.error('Update product error:', error)
+    return errorResponse('Failed to update product', 500)
   }
 }
 
-// DELETE - Delete user
+// DELETE - Delete product
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -103,15 +87,15 @@ export async function DELETE(
     if (!user) return unauthorizedResponse()
 
     const { id } = await params
-    const userId = parseInt(id)
+    const productId = parseInt(id)
 
-    await prisma.user.delete({
-      where: { id: userId },
+    await prisma.product.delete({
+      where: { id: productId },
     })
 
-    return successResponse(null, 'User deleted successfully')
+    return successResponse(null, 'Product deleted successfully')
   } catch (error) {
-    console.error('Delete user error:', error)
-    return errorResponse('Failed to delete user', 500)
+    console.error('Delete product error:', error)
+    return errorResponse('Failed to delete product', 500)
   }
 }

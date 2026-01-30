@@ -6,14 +6,17 @@ import { successResponse, errorResponse, unauthorizedResponse } from '@/lib/util
 // GET - Get single user
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: number } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = getUserFromRequest(request)
     if (!user) return unauthorizedResponse()
 
+    const { id } = await params
+    const userId = parseInt(id)
+
     const foundUser = await prisma.user.findUnique({
-      where: { id: params.id },
+      where: { id: userId },
       select: {
         id: true,
         email: true,
@@ -41,11 +44,14 @@ export async function GET(
 // PUT - Update user
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: number } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = getUserFromRequest(request)
     if (!user) return unauthorizedResponse()
+
+    const { id } = await params
+    const userId = parseInt(id)
 
     const body = await request.json()
     const { email, password, firstName, lastName, phone, role, points } = body
@@ -65,7 +71,7 @@ export async function PUT(
     }
 
     const updatedUser = await prisma.user.update({
-      where: { id: params.id },
+      where: { id: userId },
       data: updateData,
       select: {
         id: true,
@@ -90,14 +96,17 @@ export async function PUT(
 // DELETE - Delete user
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: number } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const user = getUserFromRequest(request)
     if (!user) return unauthorizedResponse()
 
+    const { id } = await params
+    const userId = parseInt(id)
+
     await prisma.user.delete({
-      where: { id: params.id },
+      where: { id: userId },
     })
 
     return successResponse(null, 'User deleted successfully')
