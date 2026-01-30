@@ -1,67 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
+}
+model Cart {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
 }
 
-model cart {
-  id        Int    @id @default(autoincrement())
-  userId    Int     @unique(map: "Cart_userId_key")
-  createdAt DateTime   @default(now())
-  updatedAt DateTime
-  user      user       @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Cart_userId_fkey")
-  cartitem  cartitem[]
-}
-
-model cartitem {
-  id        Int    @id @default(autoincrement())
+model CartItem {
+  id        Int      @id @default(autoincrement())
   cartId    Int
   productId Int
   quantity  Int      @default(1)
   createdAt DateTime @default(now())
-  updatedAt DateTime
-  cart      cart     @relation(fields: [cartId], references: [id], onDelete: Cascade, map: "CartItem_cartId_fkey")
-  product   product  @relation(fields: [productId], references: [id], map: "CartItem_productId_fkey")
+  updatedAt DateTime @updatedAt
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
 
-  @@unique([cartId, productId], map: "CartItem_cartId_productId_key")
-  @@index([productId], map: "CartItem_productId_fkey")
+  @@unique([cartId, productId])
+  @@index([productId])
 }
 
-model order {
-  id              Int    @id @default(autoincrement())
+model Order {
+  id              Int         @id @default(autoincrement())
   userId          Int
   totalAmount     Float
-  status          order_status @default(PENDING)
+  status          OrderStatus @default(PENDING)
   paymentMethod   String?
   deliveryAddress String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  user            user         @relation(fields: [userId], references: [id], map: "Order_userId_fkey")
-  orderitem       orderitem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  user            User        @relation(fields: [userId], references: [id])
+  orderItems      OrderItem[]
 
-  @@index([userId], map: "Order_userId_fkey")
+  @@index([userId])
 }
 
-model orderitem {
-  id        Int    @id @default(autoincrement())
+model OrderItem {
+  id        Int      @id @default(autoincrement())
   orderId   Int
   productId Int
   quantity  Int
   price     Float
   createdAt DateTime @default(now())
-  order     order    @relation(fields: [orderId], references: [id], onDelete: Cascade, map: "OrderItem_orderId_fkey")
-  product   product  @relation(fields: [productId], references: [id], map: "OrderItem_productId_fkey")
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
 
-  @@index([orderId], map: "OrderItem_orderId_fkey")
-  @@index([productId], map: "OrderItem_productId_fkey")
+  @@index([orderId])
+  @@index([productId])
 }
 
-model product {
-  id            Int    @id @default(autoincrement())
-  barcode       String         @unique(map: "Product_barcode_key")
+model Product {
+  id            Int            @id @default(autoincrement())
+  barcode       String         @unique
   name          String
   description   String?
   price         Float
@@ -72,70 +77,70 @@ model product {
   stockQuantity Int            @default(0)
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
-  cartitem      cartitem[]
-  orderitem     orderitem[]
-  wishlistitem  wishlistitem[]
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  wishlistItems WishlistItem[]
 }
 
-model receipt {
-  id          Int    @id @default(autoincrement())
+model Receipt {
+  id          Int      @id @default(autoincrement())
   userId      Int
   orderId     Int
   totalAmount Float
-  items       String   @db.LongText
+  items       String   // PostgreSQL handles large text automatically
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
-  user        user     @relation(fields: [userId], references: [id], map: "Receipt_userId_fkey")
+  user        User     @relation(fields: [userId], references: [id])
 
-  @@index([userId], map: "Receipt_userId_fkey")
+  @@index([userId])
 }
 
-model user {
-  id        Int    @id @default(autoincrement())
-  email     String    @unique(map: "User_email_key")
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
   password  String
   firstName String
   lastName  String
   phone     String?
-  role      user_role @default(CUSTOMER)
-  points    Int       @default(0)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  cart      cart?
-  order     order[]
-  receipt   receipt[]
-  wishlist  wishlist?
+  role      UserRole @default(CUSTOMER)
+  points    Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cart      Cart?
+  orders    Order[]
+  receipts  Receipt[]
+  wishlist  Wishlist?
 }
 
-model wishlist {
-  id           Int    @id @default(autoincrement())
-  userId       Int         @unique(map: "Wishlist_userId_key")
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime
-  user         user           @relation(fields: [userId], references: [id], onDelete: Cascade, map: "Wishlist_userId_fkey")
-  wishlistitem wishlistitem[]
+model Wishlist {
+  id            Int            @id @default(autoincrement())
+  userId        Int            @unique
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  wishlistItems WishlistItem[]
 }
 
-model wishlistitem {
-  id         Int    @id @default(autoincrement())
+model WishlistItem {
+  id         Int      @id @default(autoincrement())
   wishlistId Int
   productId  Int
   createdAt  DateTime @default(now())
-  product    product  @relation(fields: [productId], references: [id], map: "WishlistItem_productId_fkey")
-  wishlist   wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade, map: "WishlistItem_wishlistId_fkey")
+  product    Product  @relation(fields: [productId], references: [id])
+  wishlist   Wishlist @relation(fields: [wishlistId], references: [id], onDelete: Cascade)
 
-  @@unique([wishlistId, productId], map: "WishlistItem_wishlistId_productId_key")
-  @@index([productId], map: "WishlistItem_productId_fkey")
+  @@unique([wishlistId, productId])
+  @@index([productId])
 }
 
-enum order_status {
+enum OrderStatus {
   PENDING
   PROCESSING
   COMPLETED
   CANCELLED
 }
 
-enum user_role {
+enum UserRole {
   CUSTOMER
   ADMIN
   MANAGER
