@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, Edit, Trash2, Search, Upload, X } from 'lucide-react'
+import { Plus, Edit, Trash2, Search } from 'lucide-react'
+// Upload and X icons temporarily removed
+
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([])
@@ -186,82 +188,85 @@ function ProductModal({ product, onClose, onSuccess }: any) {
     stockQuantity: product?.stockQuantity || 0,
     inStock: product?.inStock ?? true,
   })
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string>(product?.imageUrl || '')
+  // Image upload temporarily disabled
+  // const [imageFile, setImageFile] = useState<File | null>(null)
+  // const [imagePreview, setImagePreview] = useState<string>(product?.imageUrl || '')
   const [uploading, setUploading] = useState(false)
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) {
-      // Validate file type
-      if (!file.type.startsWith('image/')) {
-        alert('Please select an image file')
-        return
-      }
-      
-      // Validate file size (e.g., max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        alert('Image size should be less than 5MB')
-        return
-      }
+  // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0]
+  //   if (file) {
+  //     // Validate file type
+  //     if (!file.type.startsWith('image/')) {
+  //       alert('Please select an image file')
+  //       return
+  //     }
+  //     
+  //     // Validate file size (e.g., max 5MB)
+  //     if (file.size > 5 * 1024 * 1024) {
+  //       alert('Image size should be less than 5MB')
+  //       return
+  //     }
 
-      setImageFile(file)
-      
-      // Create preview
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string)
-      }
-      reader.readAsDataURL(file)
-    }
-  }
+  //     setImageFile(file)
+  //     
+  //     // Create preview
+  //     const reader = new FileReader()
+  //     reader.onloadend = () => {
+  //       setImagePreview(reader.result as string)
+  //     }
+  //     reader.readAsDataURL(file)
+  //   }
+  // }
 
-  const removeImage = () => {
-    setImageFile(null)
-    setImagePreview('')
-    setFormData({ ...formData, imageUrl: '' })
-  }
+  // const removeImage = () => {
+  //   setImageFile(null)
+  //   setImagePreview('')
+  //   setFormData({ ...formData, imageUrl: '' })
+  // }
 
-  const uploadImage = async (): Promise<string | null> => {
-    if (!imageFile) return formData.imageUrl || null
+  // const uploadImage = async (): Promise<string | null> => {
+  //   if (!imageFile) return formData.imageUrl || null
 
-    const formDataUpload = new FormData()
-    formDataUpload.append('file', imageFile)
+  //   const formDataUpload = new FormData()
+  //   formDataUpload.append('file', imageFile)
 
-    try {
-      const token = localStorage.getItem('auth_token')
-      const response = await fetch('/api/dashboard/upload', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formDataUpload,
-      })
+  //   try {
+  //     const token = localStorage.getItem('auth_token')
+  //     const response = await fetch('/api/dashboard/upload', {
+  //       method: 'POST',
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //       body: formDataUpload,
+  //     })
 
-      const data = await response.json()
-      console.log('Upload response:', data) 
-      if (data.success) {
-        return data.data.url
-      } else {
-        throw new Error(data.message || 'Upload failed')
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error)
-      throw error
-    }
-  }
+  //     const data = await response.json()
+  //     console.log('Upload response:', data) 
+  //     if (data.success) {
+  //       return data.data.url
+  //     } else {
+  //       throw new Error(data.message || 'Upload failed')
+  //     }
+  //   } catch (error) {
+  //     console.error('Error uploading image:', error)
+  //     throw error
+  //   }
+  // }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setUploading(true)
 
     try {
+      // Image upload temporarily disabled
       // Upload image first if there's a new one
-      let imageUrl = formData.imageUrl
-      if (imageFile) {
-        imageUrl = await uploadImage() || ''
-      }
-      console.log('Image URL after upload:', imageUrl) // Debug log
+      // let imageUrl = formData.imageUrl
+      // if (imageFile) {
+      //   imageUrl = await uploadImage() || ''
+      // }
+      // console.log('Image URL after upload:', imageUrl) // Debug log
+      
       const token = localStorage.getItem('auth_token')
       const url = product
         ? `/api/dashboard/products/${product.id}`
@@ -275,7 +280,7 @@ function ProductModal({ product, onClose, onSuccess }: any) {
         },
         body: JSON.stringify({
           ...formData,
-          imageUrl,
+          // imageUrl removed temporarily
         }),
       })
 
@@ -301,8 +306,8 @@ function ProductModal({ product, onClose, onSuccess }: any) {
         </h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Image Upload Section */}
-          <div>
+          {/* Image Upload Section - Temporarily commented out */}
+          {/* <div>
             <label className="block text-sm font-medium mb-2">Product Image</label>
             {imagePreview ? (
               <div className="relative inline-block">
@@ -335,7 +340,7 @@ function ProductModal({ product, onClose, onSuccess }: any) {
                 </label>
               </div>
             )}
-          </div>
+          </div> */}
 
           <div className="grid grid-cols-2 gap-4">
             <div>
