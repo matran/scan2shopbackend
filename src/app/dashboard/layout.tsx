@@ -33,7 +33,7 @@ export default function DashboardLayout({
     const token = localStorage.getItem('auth_token')
     
     if (!token) {
-      router.push('/dashboard/login')
+      router.push('/login')
       return
     }
 
