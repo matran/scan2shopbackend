@@ -11,7 +11,8 @@ import {
   Settings,
   LogOut,
   Menu,
-  X
+  X,
+  Sparkles
 } from 'lucide-react'
 
 export default function DashboardLayout({
@@ -69,10 +70,15 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gray-100">
+      <div className="flex items-center justify-center h-screen bg-gradient-to-br from-emerald-50 via-white to-teal-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-emerald-200 border-t-emerald-600 mx-auto"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-emerald-600 animate-pulse" />
+            </div>
+          </div>
+          <p className="mt-6 text-gray-600 font-medium">Loading your dashboard...</p>
         </div>
       </div>
     )
@@ -87,19 +93,104 @@ export default function DashboardLayout({
   ]
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Mobile Menu Button */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-lg"
-      >
-        {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-      </button>
+    <div className="flex h-screen bg-gradient-to-br from-gray-50 via-emerald-50/30 to-teal-50/40 overflow-hidden">
+      <style jsx global>{`
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+        
+        * {
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        h1, h2, h3, h4, h5, h6, .font-display {
+          font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        @keyframes slideIn {
+          from {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        @keyframes fadeInUp {
+          from {
+            transform: translateY(10px);
+            opacity: 0;
+          }
+          to {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .animate-slide-in {
+          animation: slideIn 0.3s ease-out;
+        }
+
+        .animate-fade-in-up {
+          animation: fadeInUp 0.4s ease-out;
+        }
+
+        .menu-item-hover {
+          position: relative;
+          overflow: hidden;
+        }
+
+        .menu-item-hover::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          height: 100%;
+          width: 4px;
+          background: linear-gradient(180deg, #10b981, #059669);
+          transform: scaleY(0);
+          transition: transform 0.3s ease;
+        }
+
+        .menu-item-hover:hover::before {
+          transform: scaleY(1);
+        }
+
+        .glass-effect {
+          background: rgba(255, 255, 255, 0.9);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+      `}</style>
+
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-50 glass-effect shadow-lg shadow-emerald-100/50">
+        <div className="flex items-center justify-between p-4">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="p-2 rounded-xl hover:bg-emerald-50 transition-all duration-300 hover:scale-105 active:scale-95"
+          >
+            {sidebarOpen ? 
+              <X className="w-6 h-6 text-gray-700" /> : 
+              <Menu className="w-6 h-6 text-gray-700" />
+            }
+          </button>
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-xl font-display font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+              Scan2Shop
+            </h1>
+          </div>
+          <div className="w-10"></div>
+        </div>
+      </div>
 
       {/* Overlay for mobile */}
       {sidebarOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          className="lg:hidden fixed inset-0 bg-black/30 backdrop-blur-sm z-30 mt-16 transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -107,29 +198,52 @@ export default function DashboardLayout({
       {/* Sidebar */}
       <div className={`
         fixed lg:static inset-y-0 left-0 z-40
-        w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out
+        w-72 glass-effect shadow-2xl shadow-emerald-100/50
+        transform transition-all duration-300 ease-out
         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+        mt-16 lg:mt-0
       `}>
-        <div className="p-6">
-          <h1 className="text-2xl font-bold text-green-600">Scan2Shop</h1>
-          <p className="text-sm text-gray-500">Admin Dashboard</p>
+        {/* Logo Section - Desktop */}
+        <div className="p-8 hidden lg:block border-b border-emerald-100/50">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-200">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-display font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                Scan2Shop
+              </h1>
+              <p className="text-xs text-gray-500 font-medium">Admin Dashboard</p>
+            </div>
+          </div>
         </div>
 
         {/* User Info */}
         {user && (
-          <div className="px-6 py-4 bg-gray-50 border-y">
-            <p className="text-sm font-medium text-gray-800">
-              {user.firstName} {user.lastName}
-            </p>
-            <p className="text-xs text-gray-500">{user.email}</p>
-            <span className="inline-block mt-2 px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-              {user.role}
-            </span>
+          <div className="px-6 py-5 bg-gradient-to-r from-emerald-50 to-teal-50 border-b border-emerald-100/50">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                {user.firstName?.charAt(0)}{user.lastName?.charAt(0)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-800 truncate">
+                  {user.firstName} {user.lastName}
+                </p>
+                <p className="text-xs text-gray-600 truncate">{user.email}</p>
+              </div>
+            </div>
+            <div className="mt-3">
+              <span className="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-white text-emerald-700 shadow-sm border border-emerald-200">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-2 animate-pulse"></div>
+                {user.role}
+              </span>
+            </div>
           </div>
         )}
         
-        <nav className="mt-6">
-          {menuItems.map((item) => {
+        {/* Navigation */}
+        <nav className="mt-4 pb-24 overflow-y-auto px-3" style={{ maxHeight: 'calc(100vh - 340px)' }}>
+          {menuItems.map((item, index) => {
             const Icon = item.icon
             const isActive = pathname === item.href
             
@@ -138,31 +252,41 @@ export default function DashboardLayout({
                 key={item.href}
                 href={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors ${
-                  isActive ? 'bg-green-50 text-green-600 border-r-4 border-green-600' : ''
-                }`}
+                className={`
+                  menu-item-hover flex items-center px-4 py-3.5 mb-1.5 rounded-xl
+                  text-gray-700 font-medium transition-all duration-300
+                  ${isActive 
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-200' 
+                    : 'hover:bg-white hover:shadow-md'
+                  }
+                `}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                <Icon className="w-5 h-5 mr-3" />
-                {item.label}
+                <Icon className={`w-5 h-5 mr-3 transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} />
+                <span className="text-sm">{item.label}</span>
+                {isActive && (
+                  <div className="ml-auto w-2 h-2 rounded-full bg-white animate-pulse"></div>
+                )}
               </Link>
             )
           })}
         </nav>
 
-        <div className="absolute bottom-0 w-64 p-6 border-t">
+        {/* Logout Button */}
+        <div className="absolute bottom-0 w-72 p-6 border-t border-emerald-100/50 bg-white/80 backdrop-blur-sm">
           <button
             onClick={handleLogout}
-            className="flex items-center text-gray-700 hover:text-red-600 transition-colors"
+            className="flex items-center w-full px-4 py-3 rounded-xl text-gray-700 font-medium hover:bg-red-50 hover:text-red-600 transition-all duration-300 hover:shadow-md group"
           >
-            <LogOut className="w-5 h-5 mr-3" />
-            Logout
+            <LogOut className="w-5 h-5 mr-3 transition-transform duration-300 group-hover:scale-110" />
+            <span className="text-sm">Logout</span>
           </button>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
-        <div className="p-8">
+      <div className="flex-1 overflow-auto pt-16 lg:pt-0">
+        <div className="p-4 sm:p-6 lg:p-8 animate-fade-in-up">
           {children}
         </div>
       </div>

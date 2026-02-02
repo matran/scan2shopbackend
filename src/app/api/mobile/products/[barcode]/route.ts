@@ -8,8 +8,8 @@ export async function GET(
   { params }: { params: Promise<{ barcode: string }> }
 ) {
   try {
-    const user = getUserFromRequest(request)
-    if (!user) return unauthorizedResponse()
+   // const user = getUserFromRequest(request)
+   // if (!user) return unauthorizedResponse()
 
     const { barcode } = await params
 
