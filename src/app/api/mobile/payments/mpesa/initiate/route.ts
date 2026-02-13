@@ -6,12 +6,14 @@ import { initiateStkPush, formatPhoneNumber } from '@/lib/mpesa'
 
 export async function POST(request: NextRequest) {
   try {
-   // const user = getUserFromRequest(request)
-    //if (!user) return unauthorizedResponse()
+    // ✅ Get authenticated user
+    const user = getUserFromRequest(request)
+    if (!user) return unauthorizedResponse()
 
     const body = await request.json()
-    const { amount, phoneNumber, description } = body
+    const { amount, phoneNumber, orderId, description } = body
 
+    // Validate required fields
     if (!amount || !phoneNumber) {
       return errorResponse('Amount and phone number are required')
     }
@@ -29,12 +31,25 @@ export async function POST(request: NextRequest) {
       return errorResponse('Invalid Kenyan phone number')
     }
 
+    // Validate orderId if provided
+    if (orderId) {
+      const orderExists = await prisma.order.findUnique({
+        where: { 
+          id: parseInt(orderId),
+          userId: user.userId, // ✅ Ensure user owns the order
+        }
+      })
+      if (!orderExists) {
+        return errorResponse('Invalid order ID or order does not belong to you')
+      }
+    }
+
     // Initiate STK Push
     const stkResponse = await initiateStkPush({
       amount,
       phoneNumber: formattedPhone,
-      accountReference: `TEST-${Date.now()}`,
-      transactionDesc: description || 'Test payment',
+      accountReference: orderId ? `ORDER-${orderId}` : `TEST-${Date.now()}`,
+      transactionDesc: description || (orderId ? `Payment for Order #${orderId}` : 'Payment'),
     })
 
     // Check if STK Push was successful
@@ -44,11 +59,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Save payment record in database WITHOUT orderId
+    // Save payment record in database
     const payment = await prisma.payment.create({
       data: {
-        userId: 1,
-        // No orderId - testing without order
+        userId: user.userId, // ✅ Use authenticated user ID
+        ...(orderId && { orderId: parseInt(orderId) }), // ✅ Include orderId if provided
         checkoutRequestId: stkResponse.CheckoutRequestID,
         merchantRequestId: stkResponse.MerchantRequestID,
         phoneNumber: formattedPhone,
