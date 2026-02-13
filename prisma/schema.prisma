@@ -46,7 +46,7 @@ model Order {
   updatedAt       DateTime    @updatedAt
   user            User        @relation(fields: [userId], references: [id])
   orderItems      OrderItem[]
-
+  payments        Payment[]
   @@index([userId])
 }
 
@@ -109,6 +109,7 @@ model User {
   cart      Cart?
   orders    Order[]
   receipts  Receipt[]
+  payments  Payment[]
   wishlist  Wishlist?
 }
 
@@ -132,7 +133,42 @@ model WishlistItem {
   @@unique([wishlistId, productId])
   @@index([productId])
 }
+model Payment {
+  id                  Int       @id @default(autoincrement())
+  userId              Int
+  user                User          @relation(fields: [userId], references: [id])
+  orderId             Int?          // Remove @unique
+  order               Order?        @relation(fields: [orderId], references: [id])
+  
+  // M-Pesa Details
+  checkoutRequestId   String        @unique
+  merchantRequestId   String?
+  mpesaReceiptNumber  String?       @unique
+  phoneNumber         String
+  amount              Float
+  
+  // Status
+  status              PaymentStatus @default(PENDING)
+  failureReason       String?
+  
+  // Timestamps
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  completedAt         DateTime?
+  
+  @@index([userId])
+  @@index([orderId])
+  @@index([checkoutRequestId])
+  @@index([status])
+}
 
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+  TIMEOUT
+}
 enum OrderStatus {
   PENDING
   PROCESSING
