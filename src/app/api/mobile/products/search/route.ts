@@ -12,12 +12,12 @@ export async function GET(request: NextRequest) {
     const query = searchParams.get('q') || ''
     const category = searchParams.get('category')
 
-   let where: any = {
-  OR: [
-    { name: { contains: query } },      // MySQL is case-insensitive by default
-    { barcode: { contains: query } },
-  ],
-}
+    let where: any = {
+      OR: [
+        { name: { contains: query, mode: 'insensitive' } },      // Case-insensitive search
+        { barcode: { contains: query, mode: 'insensitive' } },   // Case-insensitive search
+      ],
+    }
 
     if (category) {
       where.category = category
